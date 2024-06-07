@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# yml file with bot token
+/src/main/resources/application.yml
