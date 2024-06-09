@@ -1,4 +1,4 @@
-package com.parser.parser;
+package com.parser.parser.telegrambot;
 
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;

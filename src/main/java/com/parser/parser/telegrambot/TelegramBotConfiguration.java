@@ -1,4 +1,4 @@
-package com.parser.parser;
+package com.parser.parser.telegrambot;
 
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +14,7 @@ public class TelegramBotConfiguration {
     @Bean
     @SneakyThrows
     public TelegramBot telegramBot(@Value("${bot.token}") String botToken) {
+        // todo настроить логи, чтобы в логах были запросы
         var botOptions = new DefaultBotOptions();
         var bot = new TelegramBot(botOptions, botToken);
         telegramBotsApi().registerBot(bot);
