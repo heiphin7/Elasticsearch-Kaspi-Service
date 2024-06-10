@@ -24,8 +24,8 @@ public class KaspiParser {
 
     private static final String BASIC_URL = "https://kaspi.kz/shop/search/?text=";
 
-    public List<Product> parseByQuery(String query) {
-        List<Product> products = new ArrayList<>();
+    public String parseByQuery(String query) {
+        StringBuilder result = new StringBuilder();
 
         WebDriver webDriver = new ChromeDriver();
 
@@ -72,7 +72,7 @@ public class KaspiParser {
                 product.setLink(linkToProduct);
                 product.setPreview(linkToPreview);
 
-                products.add(product);
+                result.append(product.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,17 +80,11 @@ public class KaspiParser {
             webDriver.quit();
         }
 
-        return products;
+        return result.toString();
     }
 
-
-    /*
-        todo parse by product code
-        with selenuim.selectFirst by sample cssQuery
-    */
-
-    public Product parseByProductId(String productId) {
-        Product product = new Product();
+    public String parseByProductId(String productId) {
+        String result = "";
 
         WebDriver webDriver = new ChromeDriver();
 
@@ -131,17 +125,20 @@ public class KaspiParser {
             String linkToPreview = videoElement.select("a.item-card__image").text();
 
             // set attributes to product model & return
+            Product product = new Product();
             product.setTitle(title);
             product.setPrice(price);
             product.setLink(linkToProduct);
             product.setPreview(linkToPreview);
 
-            return product;
+            result += product.toString();
+
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             webDriver.quit();
         }
-        return product;
+        return result;
     }
 }

@@ -80,16 +80,28 @@ public class TelegramBot extends TelegramLongPollingBot {
             switch (state) {
                 case "awaiting_query":
                     userStates.remove(chatId);
-                    processQuery(chatId, text);
+                    String result = kaspiParser.parseByQuery(messageText);
+
+                    if (result.isEmpty()) {
+                        sendApiMethod(new SendMessage(chatId.toString(), "Ничего не найдено(( \n Попробуйте ввести корректный запрос"));
+                    }
+
+                    sendApiMethod(new SendMessage(chatId.toString(), result));
                     break;
                 case "awaiting_product_id":
                     userStates.remove(chatId);
-                    processProductId(chatId, text);
+                    String result1 = kaspiParser.parseByProductId(messageText);
+
+                    if (result1 == null || result1.isEmpty()) {
+                        sendApiMethod(new SendMessage(chatId.toString(), "Товар по данному коду не найден! \n Проверьте правильность кода"));
+                    } else {
+                        sendApiMethod(new SendMessage(chatId.toString(), result1));
+                    }
                     break;
                 default:
                     sendApiMethod(new SendMessage(chatId.toString(), "Чтобы начать и получить инструкции, введите /start. \n \n" +
                             "Список доступных команд: \n" +
-                            "/start - начать диалог" +
+                            "/start - начать диалог \n" +
                             "/clear - очистить чат")
                     );
                     break;
