@@ -145,3 +145,21 @@ public class KaspiParser {
         return product;
     }
 }
+
+/*
+             todo method for telegram bot
+             for first button
+
+            List<Product> products
+                    = kaspiParser.parseByQuery(update.getMessage().getText());
+
+            StringBuilder result = new StringBuilder();
+
+            for(Product product: products) {
+                result.append("\n").append(product.toString());
+            }
+
+            if (result.isEmpty()) {
+                result = new StringBuilder("Ничего не найдено!");
+            }
+        */
