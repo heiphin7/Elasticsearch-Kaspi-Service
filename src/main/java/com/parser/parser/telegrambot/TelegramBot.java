@@ -8,14 +8,18 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -23,78 +27,61 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private KaspiParser kaspiParser;
 
-//    @SneakyThrows
-//    @Override
-//    public void onUpdateReceived(Update update) {
-//        if (update.hasCallbackQuery()) {
-//            String callData = update.getCallbackQuery().getData();
-//            Long chatId = update.getCallbackQuery().getMessage().getChatId();
-//
-//            if ("button1".equals(callData)) {
-//                sendApiMethod(new SendMessage(chatId.toString(), "Вы нажали на кнопку 1"));
-//            } else if ("button2".equals(callData)) {
-//                sendApiMethod(new SendMessage(chatId.toString(), "Вы нажали на кнопку 2"));
-//            }
-//        }
-//    }
-
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
+        // Обработка callback queries от inline кнопок
+        if (update.hasCallbackQuery()) {
+            handleCallbackQuery(update.getCallbackQuery(), update.getMessage().getText());
+        }
+
+        // Обработка обычных текстовых сообщений
         if (update.hasMessage() && update.getMessage().hasText()) {
             String text = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            // Создаем объект SendMessage для отправки сообщения
+            // Создаем объект SendMessage для отправки сообщения с выбором опций
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
             message.setText("Выберите опцию:");
-
-            // Привязываем inline клавиатуру к сообщению
             message.setReplyMarkup(getInlineKeyboard());
 
-            // todo actions after select buttons
-            if (update.getCallbackQuery().equals("Парсинг по запросу")) {
-                sendApiMethod(new SendMessage(chatId.toString(), "ты выбрал первый:)"));
-
-                // Создаем объект SendMessage для отправки сообщения
-                SendMessage messageAfterSelect = new SendMessage();
-                messageAfterSelect.setChatId(chatId.toString());
-                messageAfterSelect.setText("Выберите опцию:");
-
-                // Привязываем inline клавиатуру к сообщению
-                messageAfterSelect.setReplyMarkup(getInlineKeyboard());
-
-                // Отправляем сообщение
-                execute(messageAfterSelect);
-            } else if (update.getCallbackQuery().equals("Парсинг по коду товара")) {
-                sendApiMethod(new SendMessage(chatId.toString(), "ты выбрал второй вариант"));
-
-                // Создаем объект SendMessage для отправки сообщения
-                SendMessage messageAfterSelect = new SendMessage();
-                messageAfterSelect.setChatId(chatId.toString());
-                messageAfterSelect.setText("Выберите опцию:");
-
-                // Привязываем inline клавиатуру к сообщению
-                messageAfterSelect.setReplyMarkup(getInlineKeyboard());
-
-                // Отправляем сообщение
-                execute(messageAfterSelect);
-            } else {
-                sendApiMethod(new SendMessage(chatId.toString(), "Что-то пошло не так"));
-
-                // Создаем объект SendMessage для отправки сообщения
-                SendMessage messageAfterSelect = new SendMessage();
-                messageAfterSelect.setChatId(chatId.toString());
-                messageAfterSelect.setText("Выберите опцию:");
-
-                // Привязываем inline клавиатуру к сообщению
-                messageAfterSelect.setReplyMarkup(getInlineKeyboard());
-
-                // Отправляем сообщение
-                execute(messageAfterSelect);
-            }
+            // Отправляем сообщение с inline клавиатурой
+            execute(message);
         }
+    }
+
+    // Метод для обработки callback query
+    private void handleCallbackQuery(CallbackQuery callbackQuery, String query) throws TelegramApiException {
+        String callData = callbackQuery.getData();
+        Long chatId = callbackQuery.getMessage().getChatId();
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+
+        if ("button1".equals(callData)) {
+            List<Product> products
+                    = kaspiParser.parseByQuery(query);
+
+            StringBuilder result = new StringBuilder();
+
+            for(Product product: products) {
+                result.append("\n").append(product.toString());
+            }
+
+            if (result.isEmpty()) {
+                result = new StringBuilder("Ничего не найдено!");
+            }
+
+            message.setText(result.toString());
+        } else if ("button2".equals(callData)) {
+            message.setText("Вы выбрали 'Парсинг по коду товара'.");
+            // Здесь можно добавить дополнительные действия по парсингу
+        } else {
+            message.setText("Что-то пошло не так, попробуйте снова.");
+        }
+
+        execute(message);
     }
 
     public static InlineKeyboardMarkup getInlineKeyboard() {
@@ -128,7 +115,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         return markupInline;
     }
 
-
     @Override
     public String getBotUsername() {
         return "My-first-bot";
@@ -138,4 +124,3 @@ public class TelegramBot extends TelegramLongPollingBot {
         super(options, botToken);
     }
 }
-
