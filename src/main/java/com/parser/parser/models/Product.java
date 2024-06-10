@@ -27,7 +27,7 @@ public class Product {
     private Long reviewsNumber;
 
     @Column(name = "rating")
-    private int rating;
+    private String rating;
 
     @Column(name = "link")
     private String link;
@@ -41,7 +41,12 @@ public class Product {
 
     @Override
     public String toString() {
-        return title + "\n"
-                + price + "\n \n";
+        return  "Название: " + title + "\n"
+                + "Цена: " + price + "\n" +
+                "Ссылка: \n" + link + "\n"
+                + "Рейтинг (по отзывам): " + rating + "\n" +
+                "Количество отзывов: " + reviewsNumber + "\n" +
+                "Код продукта: " + id + "\n" +
+                "\n\n";
     }
 }
