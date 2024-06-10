@@ -30,61 +30,71 @@ public class TelegramBot extends TelegramLongPollingBot {
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        // Обработка callback queries от inline кнопок
-        if (update.hasCallbackQuery()) {
-            handleCallbackQuery(update.getCallbackQuery(), update.getMessage().getText());
-        }
 
-        // Обработка обычных текстовых сообщений
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String text = update.getMessage().getText();
-            Long chatId = update.getMessage().getChatId();
-
-            // Создаем объект SendMessage для отправки сообщения с выбором опций
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId.toString());
-            message.setText("Выберите опцию:");
-            message.setReplyMarkup(getInlineKeyboard());
-
-            // Отправляем сообщение с inline клавиатурой
-            execute(message);
+        if (update.hasCallbackQuery()) { // handle callBack
+            handleCallBackQuery(update.getCallbackQuery());
+        } else { // handle user's message
+            handleUserMessage(update);
         }
     }
 
-    // Метод для обработки callback query
-    private void handleCallbackQuery(CallbackQuery callbackQuery, String query) throws TelegramApiException {
+    // hander for buttons
+    @SneakyThrows
+    private void handleCallBackQuery(CallbackQuery callbackQuery) {
         String callData = callbackQuery.getData();
         Long chatId = callbackQuery.getMessage().getChatId();
 
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-
-        if ("button1".equals(callData)) {
-            List<Product> products
-                    = kaspiParser.parseByQuery(query);
-
-            StringBuilder result = new StringBuilder();
-
-            for(Product product: products) {
-                result.append("\n").append(product.toString());
-            }
-
-            if (result.isEmpty()) {
-                result = new StringBuilder("Ничего не найдено!");
-            }
-
-            message.setText(result.toString());
-        } else if ("button2".equals(callData)) {
-            message.setText("Вы выбрали 'Парсинг по коду товара'.");
-            // Здесь можно добавить дополнительные действия по парсингу
-        } else {
-            message.setText("Что-то пошло не так, попробуйте снова.");
+        if (callData.equals("button1")) {
+            userStates.put(chatId, "awaiting_query");
+            sendApiMethod(new SendMessage(chatId.toString(), "Введите ваш запрос для парсинга:"));
+        } else if (callData.equals("button2")) {
+            userStates.put(chatId, "awaiting_product_id");
+            sendApiMethod(new SendMessage(chatId.toString(), "Введите ID продукта для парсинга:"));
         }
-
-        execute(message);
     }
 
-    public static InlineKeyboardMarkup getInlineKeyboard() {
+    // handler for user's message
+    @SneakyThrows
+    private void handleUserMessage(Update update) {
+        String messageText = update.getMessage().getText();
+        var chatId = update.getMessage().getChatId();
+        SendMessage message = new SendMessage();
+
+        if (messageText.equals("/start")) {
+            // send hello message
+            message.setChatId(chatId.toString());
+            message.setText("Привет, это бот который \"парсит\" твои запросы по магазину Kaspi. Задача бота - быстро и легко давать информацию о товаре. \n \n" +
+                        "Типы парсинга: \n" +
+                        "1. Парсинг по коду товара, это когда вы должны ввести код товара в магазине Kaspi, затем вам будет дана информация об этом товаре \n" +
+                        "2. Парсинг по запросу, это когда вы должны ввести какой-либо запрос, например: \"телефоны\", а далее бот ищет результаты и пришлёт их вам \n \n" +
+                        "Чтобы начать, выберите опцию:");
+           message.setReplyMarkup(getInlineKeyboard());
+
+           // todo handle /clear method
+        } else {
+            message.setChatId(chatId.toString());
+            message.setText(
+                    "Чтобы начать и получить инструкции, введите /start. \n \n" +
+                    "Список доступных команд: \n" +
+                    "/start - начать диалог" +
+                    "/clear - очистить чат"
+            );
+        }
+
+        sendApiMethod(message);
+    }
+
+    @Override
+    public String getBotUsername() {
+        return "My-first-bot";
+    }
+
+    public TelegramBot(DefaultBotOptions options, String botToken) {
+        super(options, botToken);
+    }
+
+    // inline buttons
+    public InlineKeyboardMarkup getInlineKeyboard() {
         // Создаем объект InlineKeyboardMarkup
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
 
@@ -113,14 +123,5 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         // Возвращаем сконфигурированный InlineKeyboardMarkup
         return markupInline;
-    }
-
-    @Override
-    public String getBotUsername() {
-        return "My-first-bot";
-    }
-
-    public TelegramBot(DefaultBotOptions options, String botToken) {
-        super(options, botToken);
     }
 }
