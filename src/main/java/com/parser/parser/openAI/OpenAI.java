@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 @AllArgsConstructor
-public class OpenAIConfig {
+public class OpenAI {
 
     private final String token;
     private final RestTemplate restTemplate;

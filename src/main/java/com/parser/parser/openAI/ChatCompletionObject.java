@@ -7,6 +7,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ChatCompletionObject {
 
-    private List<Message> choises;
+    private List<Choise> choises;
 
 }
