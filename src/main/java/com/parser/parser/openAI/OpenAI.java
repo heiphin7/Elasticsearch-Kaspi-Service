@@ -22,7 +22,7 @@ public class OpenAI {
         String request = """
                 {
                     "model": "gpt-3.5-turbo-instruct",
-                    "prompt": "%s"
+                    "prompt": "%s",
                     "max_tokens": 7,
                     "temperature": 0
                   }

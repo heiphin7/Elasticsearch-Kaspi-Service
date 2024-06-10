@@ -1,6 +1,7 @@
 package com.parser.parser.telegrambot;
 
 import com.parser.parser.models.Product;
+import com.parser.parser.openAI.OpenAI;
 import com.parser.parser.parsers.KaspiParser;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +32,35 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private KaspiParser kaspiParser;
 
+    @Autowired
+    private OpenAI openAI;
+
     private Map<Long, String> userStates = new HashMap<>();
+
+//    @SneakyThrows
+//    @Override
+//    public void onUpdateReceived(Update update) {
+//
+//        if (update.hasCallbackQuery()) { // handle callBack
+//            handleCallBackQuery(update.getCallbackQuery());
+//        } else { // handle user's message
+//            handleUserMessage(update);
+//        }
+//    }
 
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
+        var text = update.getMessage().getText();
+        var chatId = update.getMessage().getChatId();
 
-        if (update.hasCallbackQuery()) { // handle callBack
-            handleCallBackQuery(update.getCallbackQuery());
-        } else { // handle user's message
-            handleUserMessage(update);
-        }
+        // send request with text
+        var chatCompletionResponse = openAI.chatCompletionObject(text);
+        var textResponse = chatCompletionResponse.getChoises().get(0)
+                .getMessage().getContent();
+
+        SendMessage message = new SendMessage(chatId.toString(), textResponse);
+        sendApiMethod(message);
     }
 
     // hander for buttons
