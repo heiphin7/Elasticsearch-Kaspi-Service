@@ -32,9 +32,16 @@ public class Product {
     @Column(name = "link")
     private String link;
 
-
+    @Column(name = "preview")
+    private String preview;
 
     public Product() {
 
+    }
+
+    @Override
+    public String toString() {
+        return title + "\n"
+                + price + "\n";
     }
 }

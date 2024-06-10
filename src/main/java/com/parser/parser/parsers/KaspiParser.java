@@ -1,5 +1,6 @@
 package com.parser.parser.parsers;
 
+import com.parser.parser.models.Product;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,15 +12,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
+import java.util.ArrayList;
 import java.util.Date;
-import org.openqa.selenium.Cookie;
+import java.util.List;
 
+import org.openqa.selenium.Cookie;
+import org.springframework.stereotype.Service;
+
+@Service
 public class KaspiParser {
 
     private static final String BASIC_URL = "https://kaspi.kz/shop/search/?text=";
 
-    public static String parseByQuery(String query) {
-        String result = "";
+    public List<Product> parseByQuery(String query) {
+        List<Product> products = new ArrayList<>();
 
         WebDriver webDriver = new ChromeDriver();
 
@@ -45,7 +51,7 @@ public class KaspiParser {
 
             String html = webDriver.getPageSource();
             Document doc = Jsoup.parse(html);
-            Elements videoElements = doc.select("div.item-card"); // Corrected selector to match your HTML structure.
+            Elements videoElements = doc.select("div.item-card");
 
             if (videoElements.isEmpty()) {
                 System.out.println("No elements found with the given selector.");
@@ -57,13 +63,13 @@ public class KaspiParser {
                 String linkToProduct = videoElement.select("a.item-card__image-wrapper").text();
                 String linkToPreview = videoElement.select("a.item-card__image").text();
 
-                System.out.println();
-                System.out.println("Title: " + title);
-                System.out.println("Price: " + price);
-                System.out.println("Link to product: " + linkToProduct);
-                System.out.println("Link to Preview: " + linkToPreview);
-                System.out.println();
+                Product product = new Product();
+                product.setTitle(title);
+                product.setPrice(price);
+                product.setLink(linkToProduct);
+                product.setPreview(linkToPreview);
 
+                products.add(product);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,10 +77,6 @@ public class KaspiParser {
             webDriver.quit();
         }
 
-        return result;
-    }
-
-    public static void main(String[] args) {
-        parseByQuery("телефон");
+        return products;
     }
 }
