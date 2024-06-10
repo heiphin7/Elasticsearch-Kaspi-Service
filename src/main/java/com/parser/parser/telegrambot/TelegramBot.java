@@ -18,7 +18,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -26,6 +28,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private KaspiParser kaspiParser;
+
+    private Map<Long, String> userStates = new HashMap<>();
 
     @SneakyThrows
     @Override
@@ -72,15 +76,25 @@ public class TelegramBot extends TelegramLongPollingBot {
 
            // todo handle /clear method
         } else {
-            message.setChatId(chatId.toString());
-            message.setText(
-                    "Чтобы начать и получить инструкции, введите /start. \n \n" +
-                    "Список доступных команд: \n" +
-                    "/start - начать диалог" +
-                    "/clear - очистить чат"
-            );
+            String state = userStates.getOrDefault(chatId, "");
+            switch (state) {
+                case "awaiting_query":
+                    userStates.remove(chatId);
+                    processQuery(chatId, text);
+                    break;
+                case "awaiting_product_id":
+                    userStates.remove(chatId);
+                    processProductId(chatId, text);
+                    break;
+                default:
+                    sendApiMethod(new SendMessage(chatId.toString(), "Чтобы начать и получить инструкции, введите /start. \n \n" +
+                            "Список доступных команд: \n" +
+                            "/start - начать диалог" +
+                            "/clear - очистить чат")
+                    );
+                    break;
+            }
         }
-
         sendApiMethod(message);
     }
 
