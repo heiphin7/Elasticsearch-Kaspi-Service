@@ -10,7 +10,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.NoSuchElementException;
 
 import java.util.Date;
 import org.openqa.selenium.Cookie;
@@ -23,92 +22,6 @@ public class KaspiParser {
         String result = "";
 
         WebDriver webDriver = new ChromeDriver();
-        /*
-        try {
-            webDriver.get(BASIC_URL + query);
-
-            // Добавляем куки перед тем, как страница полностью загрузится
-            Cookie cookie = new Cookie.Builder("kaspi.storefront.cookie.city", "710000000")
-                    .domain("kaspi.kz")
-                    .path("/")
-                    .expiresOn(new Date(System.currentTimeMillis() + 31536000000L)) // Устанавливаем время истечения куки
-                    .isSecure(false)
-                    .build();
-            webDriver.manage().addCookie(cookie);
-
-            // После добавления куки перезагружаем страницу, чтобы куки вступили в силу
-            webDriver.navigate().refresh();
-
-            // Теперь продолжаем с обработкой страницы как обычно
-            String pageTitle = webDriver.getTitle();
-            if (pageTitle.contains("404 Not Found")) {
-                return result;
-            }
-
-            // Для прокрутки вниз страницы
-            JavascriptExecutor js = (JavascriptExecutor) webDriver;
-
-            Thread.sleep(1500); // Ждём 1.5 секунд для прогрузки видео
-
-            // Цикл для скролла вниз
-            for (int i = 0; i < 10; i++) {
-                Thread.sleep(100);
-                js.executeScript("window.scrollBy(0,500)");
-            }
-
-            Thread.sleep(1000);
-
-            // Ждем, пока элемент с определенным селектором не станет видимым
-            WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofMillis(10000)); // Максимальное время ожидания в секундах
-
-            // После того, как элемент станет видимым, продолжаем выполнение кода
-            String html = webDriver.getPageSource();
-
-            // Создаем объект Document из HTML-кода страницы
-            Document doc = Jsoup.parse(html);
-
-            // Извлекаем блоки с видео
-            Elements videoElements = doc.select("item-card ddl_product ddl_product_link undefined ");
-
-            // Перебираем каждый элемент с видео и извлекаем информацию
-            for (Element videoElement : videoElements) {
-                // Извлекаем заголовок видео
-                Element titleElement = videoElement.selectFirst("item-card__name-link");
-                String title = titleElement != null ? titleElement.text() : "Нет заголовка";
-
-                // Извлекаем ссылку на видео
-                Element thumbnailElement = videoElement.selectFirst("a.item-card__image-wrapper");
-                String videoLink = thumbnailElement != null ? thumbnailElement.attr("href") : "Нет ссылки на товар";
-
-                // Извлекаем превью видео
-                Element previewImageElement = videoElement.selectFirst("img.item-card__image");
-                String previewImageLink = previewImageElement != null ? previewImageElement.attr("src") : "Нет превью";
-
-                // Извлекаем дату загрузки видео
-                Element priceElement = videoElement.select("span.item-card__prices-price").get(1);
-                String price = priceElement != null ? priceElement.text() : "Нет данных о дате загрузки";
-
-                System.out.println(title);
-                System.out.println(videoLink);
-                System.out.println(previewImageLink);
-                System.out.println(price);
-                System.out.println();
-            }
-
-        } catch (NoSuchElementException e) {
-            // Если элемент title не найден, обработка ошибки
-            e.printStackTrace();
-            return result;
-
-        } catch (Exception e) {
-            // Ловим остальные исключения
-            e.printStackTrace();
-            return result;
-
-        } finally {
-            webDriver.quit();
-        }
-         */
 
         try {
             webDriver.get(BASIC_URL + query);
