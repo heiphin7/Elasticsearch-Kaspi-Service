@@ -101,13 +101,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             switch (state) {
                 case "awaiting_query":
                     userStates.remove(chatId);
-                    String result = kaspiParser.parseByQuery(messageText);
+                    //String result = kaspiParser.parseByQuery(messageText);
 
-                    if (result.isEmpty()) {
-                        sendApiMethod(new SendMessage(chatId.toString(), "Ничего не найдено(( \n Попробуйте ввести корректный запрос"));
-                    }
+//                    if (result.isEmpty()) {
+//                        sendApiMethod(new SendMessage(chatId.toString(), "Ничего не найдено(( \n Попробуйте ввести корректный запрос"));
+//                    }
 
-                    sendApiMethod(new SendMessage(chatId.toString(), result));
+                    // sendApiMethod(new SendMessage(chatId.toString(), result));
                     break;
                 case "awaiting_product_id":
                     userStates.remove(chatId);
