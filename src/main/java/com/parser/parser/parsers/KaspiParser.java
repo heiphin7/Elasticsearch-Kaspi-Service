@@ -2,7 +2,6 @@ package com.parser.parser.parsers;
 
 import com.parser.parser.models.Product;
 import com.parser.parser.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -42,10 +41,11 @@ public class KaspiParser {
                 if (i == 1) {
                     url = BASIC_URL + query;
                 } else {
-                    url = BASIC_URL + query + "&?page=" + i;
+                    url = BASIC_URL + query + "&q=%3AavailableInZones%3AMagnum_ZONE5&sort=relevance&filteredByCategory=true&sc=4&page=" + i;
                 }
 
                 webDriver.get(url);
+                System.out.println(url); // todo remove
                 Cookie cookie = new Cookie.Builder("kaspi.storefront.cookie.city", "710000000")
                         .domain("kaspi.kz")
                         .path("/")
@@ -91,8 +91,6 @@ public class KaspiParser {
                     product.setId(productID);
                     product.setCategory(category);
 
-                    System.out.println(product);
-
                     products.add(product);
                 }
             }
@@ -127,9 +125,9 @@ public class KaspiParser {
             WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
 
             JavascriptExecutor js = (JavascriptExecutor) webDriver;
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
                 js.executeScript("window.scrollBy(0,500)");
-                Thread.sleep(100);
+                Thread.sleep(200);
             }
 
             String html = webDriver.getPageSource();
@@ -201,6 +199,5 @@ public class KaspiParser {
 
         return categories.toString();
     }
-
 
 }
