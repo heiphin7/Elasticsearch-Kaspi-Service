@@ -38,10 +38,12 @@ public class KaspiParser {
             for (int i = 1; i < pagescount; i++) {
                 String url;
 
+                // if first page, we use basic url with query
                 if (i == 1) {
                     url = BASIC_URL + query;
                 } else {
-                    url = BASIC_URL + query + "&q=%3AavailableInZones%3AMagnum_ZONE5&sort=relevance&filteredByCategory=true&sc=4&page=" + i;
+                    // todo check & fix sc parametre in path
+                    url = BASIC_URL + query + "&q=%3AavailableInZones%3AMagnum_ZONE5&sort=relevance&filteredByCategory=true&sc&page=" + i;
                 }
 
                 webDriver.get(url);
@@ -95,7 +97,7 @@ public class KaspiParser {
                 }
             }
         } catch(Exception e){
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         } finally{
             webDriver.quit();
         }
@@ -165,7 +167,7 @@ public class KaspiParser {
                 return product.toString();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         } finally {
             webDriver.quit();
         }
@@ -191,7 +193,7 @@ public class KaspiParser {
         StringBuilder categories = new StringBuilder();
 
         for (Element category : categoryElements) {
-            if (categories.length() > 0) {
+            if (!categories.isEmpty()) {
                 categories.append(" > ");
             }
             categories.append(category.text().trim());
