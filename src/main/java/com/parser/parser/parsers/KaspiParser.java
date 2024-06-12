@@ -52,6 +52,8 @@ public class KaspiParser {
                 System.out.println("No elements found with the given selector.");
             }
 
+            String category = extractCategory(html);
+
             for (Element videoElement : videoElements) {
                 String title = videoElement.select("div.item-card__name").text();
                 String price = videoElement.select("span.item-card__prices-price").text();
@@ -59,7 +61,6 @@ public class KaspiParser {
                 String productID = videoElement.attr("data-product-id");
                 String reviewsText = videoElement.select("div.item-card__rating a").text(); // "(1241 отзыв)"
                 String rating = parseRatingFromClassName(videoElement.select("span.rating").attr("class"));
-
                 long reviewsNumber = parseReviewsNumber(reviewsText);
 
                 Product product = new Product();
@@ -69,6 +70,9 @@ public class KaspiParser {
                 product.setRating(rating);
                 product.setReviewsNumber(reviewsNumber);
                 product.setId(productID);
+                product.setCategory(category);
+
+                System.out.println(product);
 
                 result.append(product);
             }
@@ -158,7 +162,27 @@ public class KaspiParser {
     }
 
     private long parseReviewsNumber(String reviewsText) {
-        // Из текста "(1241 отзыв)" извлекаем только число
+        // Из текста Пример: "(1241 отзыв)" извлекаем только число
         return Long.parseLong(reviewsText.replaceAll("[^0-9]", ""));
+    }
+
+    public String extractCategory(String html) {
+        Document document = Jsoup.parse(html);
+        Elements categoryElements = document.select("ul.tree__items > li.tree__item > span.tree__link");
+        StringBuilder categories = new StringBuilder();
+
+        for (Element category : categoryElements) {
+            if (categories.length() > 0) {
+                categories.append(" > ");
+            }
+            categories.append(category.text().trim());
+        }
+
+        return categories.toString();
+    }
+
+    public static void main(String[] args) {
+        KaspiParser parser = new KaspiParser();
+        System.out.println(parser.parseByQuery("телефоны"));
     }
 }

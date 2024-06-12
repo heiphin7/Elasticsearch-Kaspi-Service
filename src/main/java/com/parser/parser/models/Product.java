@@ -4,11 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Table(name = "products")
 @Entity
 @Data
+@AllArgsConstructor
 public class Product {
 
     @Id
@@ -41,12 +43,13 @@ public class Product {
 
     @Override
     public String toString() {
-        return  "Название: " + title + "\n"
+        return  "Код продукта: " + id + "\n" +
+                "Название: " + title + "\n"
                 + "Цена: " + price + "\n" +
                 "Ссылка: \n" + link + "\n"
                 + "Рейтинг (по отзывам): " + rating + "\n" +
                 "Количество отзывов: " + reviewsNumber + "\n" +
-                "Код продукта: " + id + "\n" +
+                "Категория продукта: " + category  + "\n" +
                 "\n\n";
     }
 }
