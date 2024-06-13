@@ -17,6 +17,7 @@ public class ProductService {
 
         // Если мы не находим по коду, это означает что такого товара нету, поэтому можно сохранять в бд
         if (productInDb == null) {
+            System.out.println("Saved new product with id=" + product.getId());
             repository.save(product);
         }
 

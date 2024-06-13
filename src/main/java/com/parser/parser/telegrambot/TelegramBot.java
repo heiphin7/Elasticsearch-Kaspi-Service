@@ -6,20 +6,14 @@ import com.parser.parser.parsers.KaspiParser;
 import com.parser.parser.service.ProductService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,18 +49,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        KaspiParser parser = new KaspiParser();
-        List<Product> products = parser.parseByQuery("телефоны");
-        System.out.println(products.size());
+        var chatId = update.getMessage().getChatId();
+        var message = update.getMessage().getText();
 
-        int savedCount = 0;
+        List<Product> products = kaspiParser.parseByQuery(message);
 
-        for (Product product: products) {
-            productService.save(product);
-            savedCount++;
-        }
-
-        System.out.println(savedCount);
+        SendMessage message1 = new SendMessage(chatId.toString(), "Успешно спарсено!");
+        sendApiMethod(message1);
     }
 
     // hander for buttons

@@ -6,9 +6,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -16,38 +16,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.openqa.selenium.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class KaspiParser {
 
-    static final String BASIC_URL = "https://kaspi.kz/shop/search/?text=";
-
     @Autowired
     private ProductService productService;
 
+    static final String BASIC_URL = "https://kaspi.kz/shop/search/?text=";
+
     public List<Product> parseByQuery(String query) {
-        int pages = 0;
-        int pagescount = 20;
         List<Product> products = new ArrayList<>();
         WebDriver webDriver = new ChromeDriver();
+        String url = BASIC_URL + query;
 
-        try {
-            for (int i = 1; i < pagescount; i++) {
-                String url;
 
-                // if first page, we use basic url with query
-                if (i == 1) {
-                    url = BASIC_URL + query;
-                } else {
-                    // todo check & fix sc parametre in path
-                    url = BASIC_URL + query + "&q=%3AavailableInZones%3AMagnum_ZONE5&sort=relevance&filteredByCategory=true&sc&page=" + i;
-                }
-
+        for (int i = 0; i < 10; i++) {
+            try {
                 webDriver.get(url);
-                System.out.println(url); // todo remove
+
                 Cookie cookie = new Cookie.Builder("kaspi.storefront.cookie.city", "710000000")
                         .domain("kaspi.kz")
                         .path("/")
@@ -60,9 +49,9 @@ public class KaspiParser {
                 WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
 
                 JavascriptExecutor js = (JavascriptExecutor) webDriver;
-                for (int j = 0; j < 10; j++) {
+                for (int j = 0; j < 3; j++) {
                     js.executeScript("window.scrollBy(0,500)");
-                    Thread.sleep(100);
+                    Thread.sleep(150);
                 }
 
                 String html = webDriver.getPageSource();
@@ -95,16 +84,22 @@ public class KaspiParser {
 
                     products.add(product);
                 }
+
+                // Нажатие на кнопку "Следующая"
+                WebElement nextButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"scroll-to\"]/div[3]/div[2]/li[7]")));
+                if (!nextButton.getAttribute("class").contains("_disabled")) {
+                    nextButton.click();
+                    url = webDriver.getCurrentUrl();
+                    Thread.sleep(1000);  // Ждем перезагрузку страницы
+                } else {
+                    return products;
+                }
+            } catch(Exception e){
+                e.printStackTrace();
             }
-        } catch(Exception e){
-            System.out.println(e.getMessage());
-        } finally{
-            webDriver.quit();
         }
         return products;
     }
-
-
 
     public String parseByProductId(String productId) {
         String result = "";
@@ -202,4 +197,72 @@ public class KaspiParser {
         return categories.toString();
     }
 
+
+    public List<Product> parseByURL(String URL) {
+        List<Product> products = new ArrayList<>();
+        WebDriver webDriver = new ChromeDriver();
+
+        try {
+            webDriver.get(URL);
+
+            Cookie cookie = new Cookie.Builder("kaspi.storefront.cookie.city", "710000000")
+                    .domain("kaspi.kz")
+                    .path("/")
+                    .expiresOn(new Date(System.currentTimeMillis() + 31536000000L))
+                    .isSecure(false)
+                    .build();
+            webDriver.manage().addCookie(cookie);
+            webDriver.navigate().refresh();
+
+            WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+
+            JavascriptExecutor js = (JavascriptExecutor) webDriver;
+            for (int j = 0; j < 10; j++) {
+                js.executeScript("window.scrollBy(0,500)");
+                Thread.sleep(100);
+            }
+
+            String html = webDriver.getPageSource();
+            Document doc = Jsoup.parse(html);
+            Elements videoElements = doc.select("div.item-card");
+
+            if (videoElements.isEmpty()) {
+                System.out.println("Не найдено!");
+                return null;
+            }
+
+            String category = extractCategory(html);
+
+            for (Element videoElement : videoElements) {
+                String title = videoElement.select("div.item-card__name").text();
+                String price = videoElement.select("span.item-card__prices-price").text();
+                String linkToProduct = videoElement.select("a.item-card__image-wrapper").attr("href");
+                String productID = videoElement.attr("data-product-id");
+                String reviewsText = videoElement.select("div.item-card__rating a").text(); // "(1241 отзыв)"
+                String rating = parseRatingFromClassName(videoElement.select("span.rating").attr("class"));
+                long reviewsNumber = parseReviewsNumber(reviewsText);
+
+                Product product = new Product();
+                product.setTitle(title);
+                product.setPrice(price);
+                product.setLink(linkToProduct);
+                product.setRating(rating);
+                product.setReviewsNumber(reviewsNumber);
+                product.setId(productID);
+                product.setCategory(category);
+
+                products.add(product);
+            }
+        } catch(Exception e){
+            System.out.println(e.getMessage());
+        } finally{
+            webDriver.quit();
+        }
+
+        for (Product product: products) {
+            productService.save(product);
+        }
+
+        return products;
+    }
 }
