@@ -52,7 +52,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         var chatId = update.getMessage().getChatId();
         var message = update.getMessage().getText();
 
-        List<Product> products = kaspiParser.parseByQuery(message);
+        kaspiParser.parseByQuery(message);
 
         SendMessage message1 = new SendMessage(chatId.toString(), "Успешно спарсено!");
         sendApiMethod(message1);

@@ -30,11 +30,13 @@ public class KaspiParser {
     public List<Product> parseByQuery(String query) {
         List<Product> products = new ArrayList<>();
         WebDriver webDriver = new ChromeDriver();
+
         String url = BASIC_URL + query;
+        boolean hasNextElement = true;
 
-
-        for (int i = 0; i < 10; i++) {
+        while (hasNextElement) {
             try {
+                System.out.println("Начался парсинг: " + url);
                 webDriver.get(url);
 
                 Cookie cookie = new Cookie.Builder("kaspi.storefront.cookie.city", "710000000")
@@ -46,12 +48,14 @@ public class KaspiParser {
                 webDriver.manage().addCookie(cookie);
                 webDriver.navigate().refresh();
 
-                WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+                WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(5));
+
+                Thread.sleep(3000); // Ждём 3 секунды чтобы страница успела прогрузиться
 
                 JavascriptExecutor js = (JavascriptExecutor) webDriver;
-                for (int j = 0; j < 3; j++) {
-                    js.executeScript("window.scrollBy(0,500)");
-                    Thread.sleep(150);
+                for (int j = 0; j < 4; j++) {
+                    js.executeScript("window.scrollBy(0,250)");
+                    Thread.sleep(400);
                 }
 
                 String html = webDriver.getPageSource();
@@ -60,6 +64,8 @@ public class KaspiParser {
 
                 if (videoElements.isEmpty()) {
                     System.out.println("No elements found with the given selector.");
+                    hasNextElement = false;
+                    return products;
                 }
 
                 String category = extractCategory(html);
@@ -82,24 +88,33 @@ public class KaspiParser {
                     product.setId(productID);
                     product.setCategory(category);
 
+                    productService.save(product);
                     products.add(product);
                 }
 
                 // Нажатие на кнопку "Следующая"
-                WebElement nextButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"scroll-to\"]/div[3]/div[2]/li[7]")));
+                WebElement nextButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#scroll-to > div.item-cards-grid > div.pagination > li:nth-child(7)")));
                 if (!nextButton.getAttribute("class").contains("_disabled")) {
                     nextButton.click();
-                    url = webDriver.getCurrentUrl();
                     Thread.sleep(1000);  // Ждем перезагрузку страницы
+                    url = webDriver.getCurrentUrl();
                 } else {
-                    return products;
+                    System.out.println("Достигнута последняя страница.");
+                    hasNextElement = false;
                 }
+
             } catch(Exception e){
                 e.printStackTrace();
+                hasNextElement = false; // Прерываем цикл в случае ошибки
+            } finally {
+                if (!hasNextElement) {
+                    webDriver.quit();
+                }
             }
         }
         return products;
     }
+
 
     public String parseByProductId(String productId) {
         String result = "";
@@ -179,6 +194,10 @@ public class KaspiParser {
 
     private long parseReviewsNumber(String reviewsText) {
         // Из текста Пример: "(1241 отзыв)" извлекаем только число
+        if (reviewsText == null || reviewsText.isEmpty()) {
+            return 0;
+        }
+
         return Long.parseLong(reviewsText.replaceAll("[^0-9]", ""));
     }
 
