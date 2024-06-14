@@ -1,7 +1,5 @@
 package com.parser.parser.telegrambot;
 
-import com.parser.parser.models.Product;
-import com.parser.parser.openAI.OpenAI;
 import com.parser.parser.parsers.KaspiParser;
 import com.parser.parser.service.ProductService;
 import lombok.SneakyThrows;
@@ -27,24 +25,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private KaspiParser kaspiParser;
 
-    @Autowired
-    private OpenAI openAI;
-
     private Map<Long, String> userStates = new HashMap<>();
 
     @Autowired
     private ProductService productService;
-
-//    @SneakyThrows
-//    @Override
-//    public void onUpdateReceived(Update update) {
-//
-//        if (update.hasCallbackQuery()) { // handle callBack
-//            handleCallBackQuery(update.getCallbackQuery());
-//        } else { // handle user's message
-//            handleUserMessage(update);
-//        }
-//    }
 
     @SneakyThrows
     @Override

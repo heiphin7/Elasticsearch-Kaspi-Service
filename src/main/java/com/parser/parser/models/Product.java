@@ -1,40 +1,37 @@
 package com.parser.parser.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Table(name = "products")
-@Entity
+@Document(indexName = "products")
 @Data
-@AllArgsConstructor
 public class Product {
 
     @Id
     private String id;
 
-    @Column(name = "title")
+    @Field(type = FieldType.Text, name = "title")
     private String title;
 
-    @Column(name = "price")
+    @Field(type = FieldType.Text, name = "price")
     private String price;
 
-    @Column(name = "category")
+    @Field(type = FieldType.Text, name = "category")
     private String category;
 
-    @Column(name = "reviews_number")
+    @Field(type = FieldType.Integer, name = "reviews_number")
     private Long reviewsNumber;
 
-    @Column(name = "rating")
+    @Field(type = FieldType.Text, name = "rating")
     private String rating;
 
-    @Column(name = "link")
+    @Field(type = FieldType.Keyword, name = "link")
     private String link;
 
-    @Column(name = "preview")
+    @Field(type = FieldType.Text, name = "preview")
     private String preview;
 
     public Product() {

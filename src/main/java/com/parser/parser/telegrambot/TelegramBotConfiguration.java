@@ -1,6 +1,5 @@
 package com.parser.parser.telegrambot;
 
-import com.parser.parser.openAI.OpenAI;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +15,7 @@ public class TelegramBotConfiguration {
     @SneakyThrows
     public TelegramBot telegramBot(
             @Value("${bot.token}") String botToken,
-            TelegramBotsApi telegramBotsApi,
-            OpenAI openAI
+            TelegramBotsApi telegramBotsApi
     ) {
 
         var botOptions = new DefaultBotOptions();
