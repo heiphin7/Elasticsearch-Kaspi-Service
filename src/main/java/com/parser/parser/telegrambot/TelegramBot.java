@@ -1,6 +1,8 @@
 package com.parser.parser.telegrambot;
 
+import com.parser.parser.models.Product;
 import com.parser.parser.parsers.KaspiParser;
+import com.parser.parser.repository.SearchRepository;
 import com.parser.parser.service.ProductService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Component
@@ -30,15 +29,36 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private SearchRepository searchRepository;
+
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         var chatId = update.getMessage().getChatId();
         var message = update.getMessage().getText();
 
-        kaspiParser.parseByQuery(message);
+        long time = System.currentTimeMillis();
 
-        SendMessage message1 = new SendMessage(chatId.toString(), "Успешно спарсено!");
+        String response = "";
+
+        List<Product> products = searchRepository.findByTitle(message);
+
+        int size = products.size() < 10 ? products.size(): 11;
+
+        for (int i = 0; i < size; i++) {
+            response += products.get(i) + "\n";
+        }
+
+        long timesInMillis = System.currentTimeMillis() - time;
+
+        if(response == null || response.isEmpty()) {
+            response = "Ничего не найдено, попробуйте заново";
+        } else {
+            response += "Время поиска: " + timesInMillis + " ms";
+        }
+
+        SendMessage message1 = new SendMessage(chatId.toString(), response);
         sendApiMethod(message1);
     }
 

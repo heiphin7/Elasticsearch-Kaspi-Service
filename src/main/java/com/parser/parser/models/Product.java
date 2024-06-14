@@ -47,6 +47,6 @@ public class Product {
                 + "Рейтинг (по отзывам): " + rating + "\n" +
                 "Количество отзывов: " + reviewsNumber + "\n" +
                 "Категория продукта: " + category  + "\n" +
-                "\n\n";
+                "\n";
     }
 }
