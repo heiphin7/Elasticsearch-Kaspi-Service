@@ -7,7 +7,7 @@ Elasticsearch-Kaspi-Service - проект, или же сервис для по
 
 # System design
 
-![alt text](https://github.com/heiphin7/Elasticsearch-Kaspi-Service/Elaasticsearch.png)
+![alt text](https://github.com/heiphin7/Elasticsearch-Kaspi-Service/blob/main/Elasticsearch.png)
 
 # Technology stack
 
