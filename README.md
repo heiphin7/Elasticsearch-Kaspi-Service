@@ -19,6 +19,16 @@ Elasticsearch-Kaspi-Service - проект, или же сервис для по
 + Telegram Bots API: Для создания телеграм ботов
 + Elasticsearch: Поисковой движок для текстового поиска по значению
 
+# Services
+
++ **KaspiParser**
+  Это основной парсер, который использовался для "пополнения" базы. В нем есть 2 типа парсинга: Парсинг по запросу (parseByQuery) и парсинг по коду товара (parseByProductId).
+
++ **DataMigrationService**
+  Как указано в названии, это сервис который используется для миграции данных. Мигрируют данные из PostgreSQL в индекс ElasticSearch.
+
++ **ProductService**
+  Основной сервис для CRUD операций для сущности Product
 
 # How to start
 
