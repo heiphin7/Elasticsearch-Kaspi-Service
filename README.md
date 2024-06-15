@@ -5,6 +5,10 @@
 
 Elasticsearch-Kaspi-Service - проект, или же сервис для поиска товаров на Kaspi shop. В качестве поискового движка используется Elasticsearch. Данные берутся из собственной базы данных, которая была предварительно "спаршена", используя сервис KaspiParser, который также находится в файлах проекта. Elasticsearch обеспечивает очень быстрый поиск, и среди 5000+ товаров (в собственной базе данных) поиск по названию занимает от 10-100 миллисекунд.
 
+# System design
+
+![alt text](https://github.com/heiphin7/Elasticsearch-Kaspi-Service/Elaasticsearch.png)
+
 # Technology stack
 
 ## Backend 
